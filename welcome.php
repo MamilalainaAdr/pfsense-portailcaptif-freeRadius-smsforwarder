@@ -120,7 +120,7 @@
 
     // Placeholder function for "Découvrir nos offres"
     function discoverOffers() {
-        window.location.href = 'https://pfsense.localdomain.com/purchase.php'; // Redirects to pay.php
+        window.location.href = 'https://pfsense.localdomain.com/purchase.php'; // Redirects to purchase.php
     }
 </script>
 

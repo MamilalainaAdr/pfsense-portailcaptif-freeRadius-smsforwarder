@@ -5,7 +5,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Connexion à la base de données FreeRADIUS
-$servername = "192.168.56.1";
+$servername = "ip_serveur";
 $username = "radius";
 $password = "radpass";
 $dbname = "radius";

@@ -1,7 +1,7 @@
 <?php
 //logcheck-sms_log check-updating dbs
 // Paramètres de connexion à la base de données
-$host = '192.168.56.1';
+$host = 'ip_radius';
 $dbname = 'radius';
 $user = 'radius';
 $password = 'radpass';
@@ -16,7 +16,7 @@ try {
 
 // Chemin vers le répertoire contenant les fichiers logs
 $logDir = "/var/log/radacct/ip/";
-$smsLogFile = "/usr/local/www/sms_log.txt"; // Remplace par le chemin correct vers sms_log.txt
+$smsLogFile = "/usr/local/www/sms_log.txt"; //le chemin vers sms_log.txt
 
 // Ouvre le répertoire et récupère tous les fichiers qui commencent par 'detail-'
 $files = glob($logDir . 'detail-*');
