@@ -151,7 +151,7 @@
         </div>
 
         <label id="ref" for="ref">Référence de paiement : <span style="color: red;">*</span></label>
-        <input type="text" name="ref" placeholder="xxxxxxxxxx" required maxlength="10" pattern=".{10,10}" title="Exactement 10 caractères">
+        <input type="text" name="ref" placeholder="xxxxxxxxxx" required>
 
         <!-- Hidden fields to store delay and cost -->
         <input type="hidden" name="hidden_delay" id="hidden_delay" value="">
