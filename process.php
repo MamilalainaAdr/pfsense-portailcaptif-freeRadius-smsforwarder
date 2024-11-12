@@ -5,7 +5,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Connexion à la base de données FreeRADIUS
-$servername = "ip_serveur";
+$servername = "192.168.56.1";
 $username = "radius";
 $password = "radpass";
 $dbname = "radius";
@@ -30,7 +30,7 @@ error_log("Input delay: " . $input_delay);
 // Validation des entrées
 if (empty($input_reference) || $input_cost < 400 || $input_delay < 5) {
     error_log("Validation failed: Reference is empty or cost/delay too low");
-    header('Location: https://pfsense.localdomain.com/error.php');
+    header('Location: http://192.168.100.1/error.php');
     exit();
 }
 
@@ -64,7 +64,7 @@ foreach ($lines as $line) {
 // Si aucune correspondance trouvée, rediriger vers la page d'erreur
 if (!$sms_found) {
     error_log("No matching SMS found for reference: $input_reference and cost: $input_cost");
-    header('Location: https://pfsense.localdomain.com/error.php');
+    header('Location: http://192.168.100.1/error.php');
     exit();
 }
 
@@ -102,18 +102,12 @@ $stmt->bind_param("ssssssss", $auth_user, $session_timeout, $auth_user, $max_ban
 if (!$stmt->execute()) {
     die("Erreur lors de l'exécution de radreply : " . $stmt->error);
 }
-//Creation du fichier d'historique
-/*$log = fopen('log.txt','a');
-if (file_exists('log.txt')){
-    fwrite($log,"Nom:".$auth_user."; Duree:".$input_delay."; Cout:".$input_cost. PHP_EOL);
-    fclose($log);
-}*/
 
 // Fermer la connexion
 $stmt->close();
 $conn->close();
 
 // Rediriger vers la page de succès
-header('Location: https://pfsense.localdomain.com/succes.php');
+header('Location: http://192.168.100.1/succes.php');
 exit();
 ?>

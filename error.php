@@ -8,19 +8,22 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f8d7da;
+            display: flex;
+            justify-content: center;
+            font-size: 13px;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
         .container {
-            margin: 50px auto;
-            width: 50%;
-            max-width: 400px;
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+            width: 260px;
+            max-height: 80vh;
+            overflow-y: auto;
             text-align: center;
-            padding: 20px;
-            border: 2px solid #f5c6cb;
-            background-color: #f8d7da;
-            border-radius: 8px;
-        }
-        h1 {
-            color: #721c24;
         }
         p {
             color: black;
@@ -39,9 +42,9 @@
 </head>
 <body>
     <div class="container">
-        <h1>Oups!</h1>
+        <h2 style="font-weight: bolder; margin-top: 0px; color: #721c24;">Oups!</h2>
         <p>Une erreur s'est produite. Veuillez vérifier vos informations et réessayer.</p>
-        <a href="https://pfsense.localdomain.com:8003/index.php?zone=lan">Retour à l'accueil</a>
+        <a href="http://192.168.100.1:8002/index.php?zone=lan">Retour à l'accueil</a>
     </div>
 </body>
 </html>

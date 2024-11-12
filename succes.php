@@ -8,24 +8,28 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #d4edda;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
         .container {
-            margin: 50px auto;
-            width: 50%;
-            max-width: 400px;
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+            width: 260px;
+            max-height: 80vh;
+            overflow-y: auto;
             text-align: center;
-            padding: 20px;
-            border: 2px solid #c3e6cb;
-            background-color: #d4edda;
-            border-radius: 8px;
-        }
-        h1 {
-            color: #155724;
         }
         button {
             display: inline-block;
             padding: 10px 20px;
-            font-size: 16px;
+            font-size: 14px;
             color: white;
             background-color: #aaaaaa;
             border: none;
@@ -39,6 +43,11 @@
             display: none;
             margin-top: 20px;
             color: black;
+            font-size: 12px;
+        }
+        .primary_hide p{
+            margin: 0;
+            padding: 0;
         }
         a {
             display: block;
@@ -53,13 +62,13 @@
 </head>
 <body>
     <div class="container">
-        <h1>Inscription réussie !</h1>
+        <h2 style="font-weight: bolder; margin-top: 0px; color: #155724;">Inscription réussie !</h2>
         <button id="toggleButton">Voir mes identifiants</button>
         <div id="credentials" class="primary_hide">
             <p>Nom: [Votre référence]</p>
             <p>Mot de passe: [Votre référence]</p>
         </div>
-        <a href="https://pfsense.localdomain.com:8003/index.php?zone=lan">Retour à l'accueil</a>
+        <a href="http://192.168.100.1:8002/index.php?zone=lan">Retour à l'accueil</a>
     </div>
 
     <script>

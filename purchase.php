@@ -24,7 +24,7 @@
             overflow-y: auto;
             text-align: center;
         }
-        input[type="text"], input[type="password"],  input[type="number"] {
+        input[type="text"], input[type="password"], input[type="number"], select {
             width: 100%;
             padding: 12px;
             margin: 5px 0;
@@ -32,38 +32,28 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
-        /* input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        } */
         label {
             display: block;
             text-align: left;
             margin-top: 5px;
-            margin-bottom: 0px;
             color: #888888;
             font-size: 11px;
         }
         .input-container {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             margin-top: 10px;
+        }
+        select {
+            color: #666666;
         }
         .note {
-            font-size: 10px;
-            color: #999999;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            text-align: right;
-        }
-        .input-container input {
-            width: 130px;
-            margin-right: 10px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #000080;
+            margin-top: 20px;
+            margin-left: 10px;
         }
         .divider {
             width: 20%;
@@ -71,43 +61,27 @@
             background-color: #a9a9a9;
             margin: 30px auto 5px auto;
         }
-        select, input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
         .payment-method {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-        .payment-method select {
-            width: 40%;
-        }
-        .payment-method input {
-            width: 55%;
-        }
         .buttons {
             display: flex;
             justify-content: space-between;
             gap: 10px;
             margin-top: 20px;
-            margin-bottom: 30px;
         }
         .buttons button, .buttons input[type="submit"] {
-            width: 48%; /* Ensures both buttons have the same width */
+            width: 48%;
             padding: 12px;
             border: none;
             border-radius: 4px;
             background-color: #4CAF50;
             color: white;
             cursor: pointer;
-            height: 45px; /* Ensures both buttons have the same height */
-            display: inline-block;
-            text-align: center;
+            height: 45px;
         }
         .buttons button {
             background-color: #ccc;
@@ -124,34 +98,31 @@
 <div class="container">
     <img src="captiveportal-logo.png" alt="logo" style="width: 50px;">
     <h2 style="font-weight: bolder; margin-top: 0px; color: #2F4F4F;">Découvrir nos offres</h2>
-    <form method="post" action="https://pfsense.localdomain.com/process.php" onsubmit="return validateForm()">
+    <form method="post" action="http://192.168.100.1/process.php" >
         <div class="divider"></div>
 
         <label style="font-weight: bolder; color: #4d4d4d; font-size: 13px; margin-top: 20px; margin-bottom: 0px;">Option de connexion :</label>
         <div class="input-container">
             <div>
-                <label for="input_delay">Délai (en minutes) :</label>
-                <input id="input_delay" name="input_delay" type="number" placeholder="..." oninput="handleInputChange('delay')">
+                <label for="input_delay">Tarif :</label>
+                <select id="input_delay" name="input_delay" onchange="updateCost()" required title="Veuillez choisir une option">
+                    <option value="" disabled selected>...</option>
+                    <option value="15">15 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="60">1 heure</option>
+                    <option value="120">2 heures</option>
+                    <option value="180">3 heures</option>
+                    <option value="240">4 heures</option>
+                    <option value="480">8 heures</option>
+                </select>
             </div>
-            <div>
-                <label for="input_cost">Coût (en Ariary) :</label>
-                <input id="input_cost" name="input_cost" type="number" placeholder="..." oninput="handleInputChange('cost')">
-            </div>
+            <div class="note" id="result">0 Ariary</div>
         </div>
 
-        <div class="note" id="result"></div>
-
-        <label style="font-weight: bolder; color: #4d4d4d; font-size: 13px; margin-top: 20px; margin-bottom: 20px;">Paiement :</label>
-        <label id="ref" for="ref">Veuillez effectuer votre paiement : </label>
-        <div class="payment-method">
-            <select id="payment-method" name="payment-method">
-                <option value="Mvola">Mvola</option>
-            </select>
-            <input type="text" name="phone-number" placeholder="+261 38 30 613 56" disabled>
-        </div>
+        <label style="font-weight: bolder; color: #4d4d4d; font-size: 13px; margin-top: 20px; margin-bottom: 20px;">Paiement (via MVola au <b><strong style="font-size: 14px;">034 31 869 35</strong></b>)</label>
 
         <label id="ref" for="ref">Référence de paiement : <span style="color: red;">*</span></label>
-        <input type="text" name="ref" placeholder="xxxxxxxxxx" required>
+        <input type="text" name="ref" placeholder="xxxxxxxxxx" required minlength="6" title="Veuillez renseigner ce champ">
 
         <!-- Hidden fields to store delay and cost -->
         <input type="hidden" name="hidden_delay" id="hidden_delay" value="">
@@ -166,59 +137,37 @@
 </div>
 
 <script>
-    function handleInputChange(type) {
-        const delayInput = document.getElementById('input_delay');
-        const costInput = document.getElementById('input_cost');
+    function updateCost() {
+        const delaySelect = document.getElementById('input_delay');
+        const resultDiv = document.getElementById('result');
         const hiddenDelay = document.getElementById('hidden_delay');
         const hiddenCost = document.getElementById('hidden_cost');
-
-        // Reset other input when one is selected
-        if (type === 'delay') {
-            costInput.value = '';
-            hiddenDelay.value = delayInput.value;
-            hiddenCost.value = delayInput.value * 80; // Update cost based on delay
+        const costPerMinute = 30;
+        
+        // Si aucune option valide n'est sélectionnée, on masque le coût
+        if (delaySelect.value === "" || delaySelect.value === "...") {
+            resultDiv.textContent = "0 Ariary"; // Effacer le texte de coût
+            hiddenDelay.value = "";
+            hiddenCost.value = "";
         } else {
-            delayInput.value = '';
-            hiddenCost.value = costInput.value;
-            hiddenDelay.value = (costInput.value / 80).toFixed(2); // Update delay based on cost
+            const delay = parseInt(delaySelect.value);
+            const cost = delay * costPerMinute;
+            
+            hiddenDelay.value = delay;
+            hiddenCost.value = cost;
+
+            const formattedCost = cost.toLocaleString('fr-FR');
+            
+            resultDiv.textContent = `${formattedCost} Ariary`;
         }
-
-        calculateResult();
-    }
-
-    function calculateResult() {
-        const delay = parseFloat(document.getElementById('input_delay').value) || 0;
-        const cost = parseFloat(document.getElementById('input_cost').value) || 0;
-        const resultDiv = document.getElementById('result');
-
-        let result = "";
-
-        if (delay >= 5) {
-            result = `Coût: ${delay * 80} Ariary`;
-        } else if (cost >= 400) {
-            result = `Délai: ${(cost / 80).toFixed(2)} minutes`;
-        } else {
-            result = "";
-        }
-
-        resultDiv.textContent = result;
-    }
-
-    function validateForm() {
-        const delay = parseFloat(document.getElementById('input_delay').value) || 0;
-        const cost = parseFloat(document.getElementById('input_cost').value) || 0;
-
-        if (delay < 5 && cost < 400) {
-            alert("Le délai minimum est de 5 minutes ou le coût minimum est de 400 Ariary.");
-            return false;
-        }
-
-        return true;
-    }
+}
 
     function goBack() {
         window.history.back();
     }
+
+    // Initialize cost display based on the first option selected
+    document.addEventListener("DOMContentLoaded", updateCost);
 </script>
 
 </body>

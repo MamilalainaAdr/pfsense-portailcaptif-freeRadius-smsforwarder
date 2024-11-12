@@ -1,7 +1,6 @@
 <?php
-//logcheck-sms_log check-updating dbs
 // Paramètres de connexion à la base de données
-$host = 'ip_radius';
+$host = '192.168.56.1';
 $dbname = 'radius';
 $user = 'radius';
 $password = 'radpass';
@@ -14,91 +13,35 @@ try {
     die("Erreur de connexion à la base de données: " . $e->getMessage());
 }
 
-// Chemin vers le répertoire contenant les fichiers logs
-$logDir = "/var/log/radacct/ip/";
-$smsLogFile = "/usr/local/www/sms_log.txt"; //le chemin vers sms_log.txt
+// Chemin vers le fichier sms_log.txt
+$smsLogFile = "/usr/local/www/sms_log.txt"; // le chemin vers sms_log.txt
 
-// Ouvre le répertoire et récupère tous les fichiers qui commencent par 'detail-'
-$files = glob($logDir . 'detail-*');
+// Récupère tous les utilisateurs dans radcheck
+$stmt = $pdo->query("SELECT username FROM radcheck");
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Vérifie s'il y a des fichiers dans le répertoire
-if (empty($files)) {
-    die("Aucun fichier log trouvé dans $logDir.");
+// Vérifie si des utilisateurs sont trouvés
+if (empty($users)) {
+    die("Aucun utilisateur trouvé dans radcheck.");
 }
 
-foreach ($files as $logfile) {
-    echo "Traitement du fichier : $logfile\n";
+foreach ($users as $user) {
+    $userName = $user['username'];
 
-    // Ouvre chaque fichier en mode lecture
-    $fp = fopen($logfile, 'r');
-    
-    if (!$fp) {
-        echo "Impossible d'ouvrir le fichier : $logfile\n";
-        continue; // Passe au fichier suivant s'il y a une erreur d'ouverture
+    // Vérifie si l'utilisateur a des entrées dans radacct
+    $totalSessionTime = getTotalSessionTime($pdo, $userName);
+
+    // Récupère la valeur de Session-Timeout pour l'utilisateur dans radreply
+    $sessionTimeout = getSessionTimeout($pdo, $userName);
+
+    // Si la somme des temps de session est supérieure ou égale au Session-Timeout
+    if ($totalSessionTime >= $sessionTimeout) {
+        // Supprimer l'utilisateur de radcheck, radreply et sms_log.txt
+        deleteUser($pdo, $userName, $smsLogFile);
     }
-
-    $userName = null;
-
-    // Parcourt le fichier ligne par ligne
-    while ($line = fgets($fp)) {
-        // Vérifie s'il y a un "User-Name"
-        if (strpos($line, 'User-Name =') !== false) {
-            preg_match('/User-Name = "(.*?)"/', $line, $matches);
-            if (isset($matches[1])) {
-                $userName = $matches[1]; // Stocke le User-Name
-            }
-        }
-
-        // Vérifie si Acct-Status-Type est "Start" ou "Stop"
-        if (strpos($line, 'Acct-Status-Type = Start') !== false) {
-            // On ne fait rien pour "Start", on attend "Stop"
-            continue;
-        }
-
-        if (strpos($line, 'Acct-Status-Type = Stop') !== false) {
-            // Vérifie si le User-Name est encore dans la base de données
-            if ($userName && userExists($pdo, $userName)) {
-                // Récupération du temps de session total pour l'utilisateur
-                $totalSessionTime = getTotalSessionTime($pdo, $userName);
-                
-                // Récupération de la valeur de Session-Timeout
-                $sessionTimeout = getSessionTimeout($pdo, $userName);
-
-                // Comparaison et suppression
-                if ($totalSessionTime >= $sessionTimeout) {
-                    deleteUser($pdo, $userName, $smsLogFile);
-                }
-            }
-
-            // Réinitialise le User-Name après traitement
-            $userName = null;
-        }
-    }
-
-    // Ferme le fichier après lecture
-    fclose($fp);
 }
 
-// Fonction pour vérifier si l'utilisateur existe dans radcheck ou radreply
-function userExists($pdo, $userName) {
-    // Vérifie dans radcheck
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM radcheck WHERE username = :username");
-    $stmt->bindParam(':username', $userName);
-    $stmt->execute();
-    $count = $stmt->fetchColumn();
-
-    // Si l'utilisateur n'est pas dans radcheck, vérifie radreply
-    if ($count == 0) {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM radreply WHERE username = :username");
-        $stmt->bindParam(':username', $userName);
-        $stmt->execute();
-        $count = $stmt->fetchColumn();
-    }
-
-    return $count > 0;
-}
-
-// Fonction pour récupérer le temps total de session d'un utilisateur
+// Fonction pour récupérer le temps total de session d'un utilisateur depuis radacct
 function getTotalSessionTime($pdo, $userName) {
     $stmt = $pdo->prepare("SELECT SUM(acctsessiontime) AS total_time FROM radacct WHERE username = :username");
     $stmt->bindParam(':username', $userName);
@@ -107,7 +50,7 @@ function getTotalSessionTime($pdo, $userName) {
     return (int)($result['total_time'] ?? 0);
 }
 
-// Fonction pour récupérer la valeur de Session-Timeout
+// Fonction pour récupérer la valeur de Session-Timeout pour un utilisateur dans radreply
 function getSessionTimeout($pdo, $userName) {
     $stmt = $pdo->prepare("SELECT value FROM radreply WHERE username = :username AND attribute = 'Session-Timeout'");
     $stmt->bindParam(':username', $userName);
